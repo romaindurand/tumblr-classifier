@@ -32,7 +32,6 @@ router.use('/js/handlebars', express.static('node_modules/handlebars/dist'));
 router.use('/assets/ladda', express.static('node_modules/ladda/dist'));
 
 var sessions = {};
-
 var tumblrConsumerKey = tumblrConf.tumblrConsumerKey;
 var tumblrConsumerSecret = tumblrConf.tumblrConsumerSecret;
 var tumblrOauthAccessToken;
