@@ -4,7 +4,9 @@ var tags = [];
 var photos = [];
 var currentPost;
 var currentImage;
-var l = Ladda.create(document.querySelector('#submitBlogName'));
+var currentPostIndex;
+var currentImageIndex;
+var laddaSubmitBlogName = Ladda.create(document.querySelector('#submitBlogName'));
 
 $.fn.center = function() {
   this.css('position', 'absolute');
@@ -20,9 +22,9 @@ $('#submitBlogName').click(function() {
     return;
   }
 
-  l.start();
+  laddaSubmitBlogName.start();
   $.getJSON('http://localhost:3000/getPostsOffset/' + blogName + '/0', function(data) {
-    if(!data.total_posts) {
+    if (!data.total_posts) {
       gotallposts([]);
       return;
     }
@@ -31,18 +33,18 @@ $('#submitBlogName').click(function() {
     var posts = [];
     posts = _.union(posts, data.posts);
     var loaded = 1;
-    l.setProgress(loaded / pages);
+    laddaSubmitBlogName.setProgress(loaded / pages);
     for (var i = 1; i < pages; i++) {
       $.getJSON('http://localhost:3000/getPostsOffset/' + blogName + '/' + i * 20).done(gotJSON);
     }
 
     function gotJSON(data) {
       loaded++;
-      l.setProgress(loaded / pages);
+      laddaSubmitBlogName.setProgress(loaded / pages);
       posts = _.union(posts, data.posts);
-      data.posts.forEach(function (el) {
-        el.tags.forEach(function(tag){
-          if(_.indexOf(tags, tag, true) === -1) {
+      data.posts.forEach(function(el) {
+        el.tags.forEach(function(tag) {
+          if (_.indexOf(tags, tag, true) === -1) {
             tags.push(tag);
             tags.sort();
           }
@@ -53,19 +55,72 @@ $('#submitBlogName').click(function() {
   });
 });
 
+function bindKeys() {
+  $(document).keydown(function(event) {
+    window.console.log(event.which);
+    switch (event.which) {
+      case 39:
+        next();
+        break;
+
+      case 37:
+        previous();
+        break;
+    }
+  });
+}
+
+function next() {
+  currentImageIndex++;
+
+  if (!photos[currentImageIndex]) {
+    currentPostIndex++;
+    currentImageIndex = 0;
+  }
+
+  if (!posts[currentPostIndex]) {
+    currentPostIndex = 0;
+  }
+
+  updateCurrentImage();
+  displayCurrentImage();
+}
+
+function previous() {
+  currentImageIndex--;
+  if (!photos[currentImageIndex]) {
+    currentPostIndex--;
+
+    if (!posts[currentPostIndex]) {
+      currentPostIndex = posts.length - 1;
+    }
+
+    currentImageIndex = posts[currentPostIndex].photos.length - 1;
+  }
+
+  updateCurrentImage();
+  displayCurrentImage();
+}
+
+function updateCurrentImage() {
+  currentPost = posts[currentPostIndex];
+  photos = currentPost.photos;
+  currentImage = photos[currentImageIndex];
+}
+
 function gotallposts(data) {
-  l.stop();
-  if(!data.length) {
+  laddaSubmitBlogName.stop();
+  if (!data.length) {
     return;
   }
 
   $('#modalBlogName').fadeOut();
   posts = data;
-  currentPost = posts[0];
-  photos = currentPost.photos;
-  currentImage = photos[0];
+  currentPostIndex = 0;
+  currentImageIndex = 0;
+  updateCurrentImage();
   displayCurrentImage();
-
+  bindKeys();
 }
 
 function displayCurrentImage() {
