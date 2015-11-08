@@ -41,3 +41,11 @@ body {
 #modalBlogName input:focus {
 	outline-width: 0;
 }
+
+#controlPanel {
+	width: 100%;
+	position: absolute;
+	height: 200px;
+	background-color: rgba(0, 0, 0, 0.5);
+	bottom: 0px;
+}
